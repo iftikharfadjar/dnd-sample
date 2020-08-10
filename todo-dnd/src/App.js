@@ -1,7 +1,8 @@
-import React, {useState} from 'react'
-import Card from './Card'
-import styled from 'styled-components'
-import {initialData} from './initialData'
+import React, { useState } from "react";
+import Card from "./Card";
+import styled from "styled-components";
+import { initialData } from "./initialData";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
 
 const Title = styled.h1`
   color: #7B7B7B;
@@ -9,7 +10,7 @@ const Title = styled.h1`
   font-size: 30px;
   text-align: center;GB GR
   padding-top: 25px;
-`
+`;
 
 const CardContainer = styled.div`
   width: 100%;
@@ -17,26 +18,112 @@ const CardContainer = styled.div`
   justify-content: center;
   align-items: flex-start;
   margin-top: 25px;
-`
+`;
 
 function App() {
-  const [state,setState] = useState(initialData)
+  const [state, setState] = useState(initialData);
+
+  const onDragEnd = (result) => {
+    const { draggableId, source, destination, type } = result;
+    if (
+      !destination ||
+      (source.droppableId === destination.droppableId &&
+        source.index === destination.index)
+    ) {
+      return;
+    }
+
+    if (type === "card") {
+      const newCardOrder = Array.from(state.cardOrder);
+      //remove source.index
+      newCardOrder.splice(source.index, 1);
+      newCardOrder.splice(destination.index, 0, draggableId);
+
+      const newState = {
+        ...state,
+        cardOrder: newCardOrder,
+      };
+      setState(newState);
+      return;
+    }
+
+    if (type === "task") {
+      const start = state.cards[source.droppableId];
+      const finish = state.cards[destination.droppableId];
+
+      if (start === finish) {
+        const card = state.cards[source.droppableId];
+        const newTaskIds = Array.from(card.taskIds);
+        newTaskIds.splice(source.index, 1);
+        newTaskIds.splice(destination.index, 0, draggableId);
+
+        const newCard = {
+          ...card,
+          taskId: newTaskIds,
+        };
+
+        const newState = {
+          ...state,
+          cards: {
+            ...state.cards,
+            [newCard.id]: newCard,
+          },
+        };
+        setState(newState);
+        return;
+      }
+
+      //move to another card
+      const startTaskIds = Array.from(start.taskIds);
+      start.taskIds.splice(source.index, 1);
+
+      const newStart = {
+        ...start,
+        taskIds: startTaskIds,
+      };
+
+      const finishTaskIds = Array.from(finish.taskIds);
+      finishTaskIds.splice(destination.index, 0, draggableId);
+      const newFinish = {
+        ...finish,
+        taskIds: finishTaskIds,
+      };
+
+      const newState = {
+        ...state,
+        cards: {
+          ...state.cards,
+          [newStart.id]: newStart,
+          [newFinish.id]: newFinish,
+        },
+      };
+
+      setState(newState);
+      return;
+    }
+  };
 
   return (
-   <React.Fragment>
-     <Title>DRAG $ DROP REACT JS</Title>
-     <CardContainer>
-       {
-         state.cardOrder.map((cardId, index) => {
-           const card = state.cards[cardId]
-           const tasks = card.taskIds.map(TaskId => state.tasks[TaskId])
-           return <Card key={cardId} card={card} tasks={tasks} index={index} />
-         })
-       }
-     </CardContainer>
-   </React.Fragment>
-  )
+    <React.Fragment>
+      <Title>DRAG & DROP REACT JS</Title>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="all-cards" direction="horizontal" type="card">
+          {(provided) => (
+            <CardContainer ref={provided.innerRef} {...provided.droppableProps}>
+              {state.cardOrder.map((cardId, index) => {
+                const card = state.cards[cardId];
+                const tasks = card.taskIds.map((taskId) => state.tasks[taskId]);
+                return (
+                  <Card key={cardId} card={card} tasks={tasks} index={index} />
+                );
+              })}
+              {provided.placeholder}
+            </CardContainer>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </React.Fragment>
+  );
 }
 
-export default App
-
+export default App;
