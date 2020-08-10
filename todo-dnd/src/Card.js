@@ -5,7 +5,7 @@ import { Draggable, Droppable } from "react-beautiful-dnd";
 
 const CardContainer = styled.div`
   width: 300px;
-  margin: 0x 25px;
+  margin: 0px 25px;
   background: ${(props) => props.color};
   border: ${(props) =>
     props.isDraggingOver ? "4px dashed #FFF" : "4px dashed rgba(0,0,0,0)"};

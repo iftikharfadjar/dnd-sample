@@ -5,10 +5,10 @@ import { initialData } from "./initialData";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 
 const Title = styled.h1`
-  color: #7B7B7B;
+  color: #7b7b7b;
   font-family: sans-serif;
   font-size: 30px;
-  text-align: center;GB GR
+  text-align: center;
   padding-top: 25px;
 `;
 
