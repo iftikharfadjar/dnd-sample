@@ -75,7 +75,7 @@ function App() {
 
       //move to another card
       const startTaskIds = Array.from(start.taskIds);
-      start.taskIds.splice(source.index, 1);
+      startTaskIds.splice(source.index, 1);
 
       const newStart = {
         ...start,
